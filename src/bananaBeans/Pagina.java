@@ -5,7 +5,7 @@ import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.RequestScoped;
 import javax.faces.event.ActionEvent;
 
-@ManagedBean(name = "pagina", eager = true)
+@ManagedBean(name = "Pagina", eager = true)
 @RequestScoped
 public class Pagina {
    private String inicio;
@@ -19,10 +19,10 @@ public class Pagina {
 	   return inicio;
    }
    
-   public String setCadastroPagina(ActionEvent e) {
-	   String cadastro="";
-	   System.out.println("Botão de cadastro iniciado");
-	   cadastro="Wow-------------------------------------------------";
-	   return cadastro;
+   public String NovaReserva() {
+	   
+	   String resultado ="";
+	   resultado ="Sucesso.";
+	   return resultado;
    }
 }
