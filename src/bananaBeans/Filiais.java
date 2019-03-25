@@ -1,69 +1,75 @@
 package bananaBeans;
 
 import java.util.List;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.RequestScoped;
+import java.util.Vector;
 
-@ManagedBean(name = "Filiais", eager = true)
-@RequestScoped
+import javax.annotation.PostConstruct;
+import javax.faces.bean.ApplicationScoped;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
+
+@ManagedBean (name="Filiais", eager=true)
+@ApplicationScoped
 public class Filiais {
-	//Seleções das listas de Filiais e os locais dos mesmos, respectivamente - Juntamente de seus Getters e Setters
-	private String selecaoFilial ="";
-	private String selecaoLocal ="";
-	public String getSelecaoLocal() {
-		return selecaoLocal;
-	}
-	public void setSelecaoLocal(String selecaoLocal) {
-		this.selecaoLocal = selecaoLocal;
-	}
-	public String getSelecaoFilial() {
-		return selecaoFilial;
-	}
-	public void setSelecaoFilial(String selecaoFilial) {
-		this.selecaoFilial = selecaoFilial;
-	}
+	//Seleções das listas de Filiais e os locais dos mesmos, respectivamente
+	@ManagedProperty(value="#{selecaoFilial}")
+	private String selecaoFilial = "Seleção Filial";
+	
+	@ManagedProperty(value="#{selecaoLocal}")
+	private String selecaoLocal;
+
+	private List<String> lista = new Vector<String>();
 
 	//4 Locais/Filiais para serem armazenados em Strings
-	private List<String> filial;
+	private List<String> filial = new Vector<String>();
 	
 	//Cada local possui sua quantidade individual para armazenamento de salas, também em Strings
-	private List<String> locaisBanana;
-	private List<String> locaisLaranja;
-	private List<String> locaisMaca;
-	private List<String> locaisMamao;
+	private List<String> locaisBanana = new Vector<String>();
+	private List<String> locaisLaranja = new Vector<String>();
+	private List<String> locaisMaca = new Vector<String>();
+	private List<String> locaisMamao = new Vector<String>();
 	
-	//---Construtor da classe---
-	Filiais() {
-		filial.add(""); //<--- Primeiro valor vazio, para ser mostrado como caixa branca antes de ser selecionado
-		filial.add("Banana Ltda.");
-		filial.add("Laranja Incorporated.");
-		filial.add("Maçã PLLC.");
-		filial.add("Mamão S.A.");
+	private List<String> listaVazia = new Vector<String>();
 	
-		//No momento apenas são inseridas salas genéricas para cada filial.
+	@PostConstruct
+	void setFiliais(){
+	filial.add(" "); //<--- Primeiro valor "vazio", para ser mostrado como caixa branca antes de ser selecionado
+	filial.add("Banana Ltda.");
+	filial.add("Laranja Incorporated.");
+	filial.add("Maçã PLLC.");
+	filial.add("Mamão S.A.");
+	//No momento apenas são inseridas salas genéricas para cada filial.
 		//Nomes das salas são inseridos como 'Sala <número genérico>'
 		for (int i=0; i<13; i++) {
-			locaisBanana.add("Sala "+(i*3-1));
+			locaisBanana.add("Sala "+(i*3+2));
 		}
 		
 		for (int i=0; i<5; i++) {
-			locaisLaranja.add("Sala "+(i*2-1));
+			locaisLaranja.add("Sala "+(i*5+3));
 		}
 		
 		for (int i=0; i<6; i++) {
-		locaisMaca.add("Sala "+(i*2-1));
+			locaisMaca.add("Sala "+((i+1)*8-1));
 		}
-	
+
 		for (int i=0; i<3; i++) {
-			locaisMamao.add("Sala "+(i*1-1));
+			locaisMamao.add("Sala "+(i*1));
 		}
-		
+	}
+	
+	
+	//---Construtor da classe---
+	public Filiais() {
+		System.out.println("Filiais chamada");
 	}
 	//---Fim do construtor da classe.---
 
-	//Getters da filial e dos locais de cada filial
+	//Getters e Setters
 	public List<String> getFilial() {
 		return filial;
+	}
+	public List<String> getLista() {
+		return lista;
 	}
 	public List<String> getLocaisBanana() {
 		return locaisBanana;
@@ -77,27 +83,54 @@ public class Filiais {
 	public List<String> getLocaisMamao() {
 		return locaisMamao;
 	}
+	public String getSelecaoLocal() {
+		return selecaoLocal;
+	}
+	public void setSelecaoLocal(String selecaoLocal2) {
+		this.selecaoLocal = selecaoLocal2;
+	}
+	public String getSelecaoFilial() {
+		return selecaoFilial;
+	}
+	public void setSelecaoFilial(String selecaoFilial2) {
+		System.out.println("Seleção Filial - "+selecaoFilial2);
+		this.selecaoFilial = selecaoFilial2;
+		selecionarFilial();
+	}
+	public List<String> getListaVazia() {
+		return listaVazia;
+	}
+	
 	
 	public List<String> selecionarFilial(){
+		listaVazia.add(" ");
+		listaVazia.add(" ");
 		//Recebe a seleção da lista, retorna a lista de locais com o nome da seleção
-		List<String> lista;
-		
-		switch(selecaoFilial) {
-		case "Banana Ltda":
-			lista = getLocaisBanana();
-			return lista;
-		case "Laranja Incorporated." :
-			lista = getLocaisLaranja();
-			return lista;
-		case "Maçã PLLC." :
-			lista = getLocaisMaca();
-			return lista;
-		case "Mamão S.A." :
-			lista = getLocaisMamao();
-			return lista;
-		default:
-			return null; //<-- Caso valor for vazio/diferente dos pré-selecionados, a lista voltada será nula e não será gerada a próxima lista.
+		if(selecaoFilial!=null) {
+			switch(selecaoFilial) {
+			case "Banana Ltda.":
+				lista = getLocaisBanana();
+				return lista;
+			case "Laranja Incorporated." :
+				lista = getLocaisLaranja();
+				return lista;
+			case "Maçã PLLC." :
+				lista = getLocaisMaca();
+				return lista;
+			case "Mamão S.A." :
+				lista = getLocaisMamao();
+				return lista;
+			case "" :
+				return listaVazia; //Caso vazio, retorna lista vazia.
+			case " " :
+				System.out.println("Retornando vazia...");
+				return listaVazia;
+			default:
+				return listaVazia; //Caso nome não esteja cadastrado, retorna lista vazia.
 			
+			}
+		} else {
+			return listaVazia; //Caso nulo, retorna lista vazia.
 		}
 	}
 }

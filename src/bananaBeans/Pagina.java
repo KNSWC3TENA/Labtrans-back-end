@@ -1,12 +1,9 @@
 package bananaBeans;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ManagedProperty;
-import javax.faces.bean.RequestScoped;
-import javax.faces.event.ActionEvent;
+import javax.faces.bean.*;
 
 @ManagedBean(name = "Pagina", eager = true)
-@RequestScoped
+@ApplicationScoped
 public class Pagina {
    private String inicio;
    
