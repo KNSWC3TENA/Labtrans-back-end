@@ -1,5 +1,6 @@
 package bananaBeans;
 
+import javax.annotation.PostConstruct;
 import javax.faces.bean.ApplicationScoped;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
@@ -11,12 +12,16 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 import java.util.Properties;
+import java.util.Vector;
 
 @ManagedBean(name = "Controlador", eager = true)
 @ApplicationScoped
 public class Controlador {
-	
 	//======================FUNÇÕES PARA O BANCO DE DADOS==================
 	private static String userName = "root";
 	private static String password = "root";
@@ -86,23 +91,32 @@ public class Controlador {
 		}
 		// função dateTime do SQLite utiliza de "YYYY-MM-DD HH:MM:SS" - formatação utilizada em inserções no BD.
 		try {
-				sql =("SELECT * FROM reservas WHERE datahoraini "//Selecionar entre a data e a data + duração da reunião selecionada.
-						+ "BETWEEN datetime('"+datahoraini+"') AND datetime('"+datahoraini+"', '+'"+duracao+"' hours);\n");
+				sql =("SELECT * FROM reservas WHERE datetime('"+datahoraini+"') "//Selecionar entre a data e a data + duração da reunião selecionada.
+						+ "BETWEEN datetime('"+datahoraini+"') AND datetime('"+datahoraini+"', '+"+duracao+" hours');\n");
+				System.out.println(sql);
 				stmt = conn.createStatement();
 				rs = stmt.executeQuery(sql);
-				if (rs.next() == true) { // Se a seleção acima obteve resultados (já existe uma reserva no mesmo local)
+				
+				if (rs.next()) { // Se a seleção acima obteve resultados (já existe uma reserva no mesmo local)
+					System.out.println("Já havia reserva cadastrada na hora selecionada, ignorando.");
+					rs.close();
+					stmt.close();
+					conn.close();
 					return false;
-				} else { //A seleção não obteve resultados, prosseguir com a inserção-
+				} else {
+				//A seleção não obteve resultados, prosseguir com a inserção-
+				System.out.println("Seleção não obteve resultados, prosseguir com a inserção");
 				stmt.close(); //Fecha statement para que um novo seja criado sem conflitos
 				sql = ("INSERT INTO reservas (datahoraini, duracao, responsavel, filial, local, desc, cafe) "
-							+ "VALUES ('"+datahoraini+"' '"+duracao+"' '"+responsavel+"' '"+filial+"' '"+local+"' '"+desc+"' '"+cafe+"');\n");
+							+ "VALUES ('"+datahoraini+"', '"+duracao+"', '"+responsavel+"', '"+filial+"', '"+local+"', '"+desc+"', '"+cafe+"');\n");
 				stmt = conn.createStatement();
-				stmt.executeQuery(sql);
+				stmt.execute(sql);
+				System.out.println("Sucesso na inserção de reserva.");
 				return true;
 				}
 		} catch (SQLException g) {
-			System.out.println("Erro na conexão para INSERT: " + g.getMessage() + "  Código: " + g.getErrorCode());
-			return false;
+				System.out.println("Erro na conexão para INSERT: " + g.getMessage() + "  Código: " + g.getErrorCode());
+				return false;
 		}
 	}
 	
@@ -135,11 +149,12 @@ public class Controlador {
 		}
 	}
 	
-	protected ResultSet dbReservaSelect() {
+	protected static ResultSet dbReservaSelect() {
 		Statement stmt = null;
 		ResultSet rs = null;
 		Connection conn = getConnection();
 		try {
+				System.out.println("Reserva Select invocado");
 				// função dateTime utiliza de "YYYY-MM-DD HH:MM:SS" - formatação utilizada em inserções no BD.
 				String sql = ("SELECT * FROM reservas ORDER BY dateTime(datahoraini) DESC;");
 				stmt = conn.createStatement();
@@ -190,13 +205,10 @@ public class Controlador {
 	private boolean boxCafe = false;
 	private int spinvalue = 0; //Integer para armazenar último valor selecionado no spinner, separado do que vai ser colocado no BD
 	private int id;
-	private String datahoraini;
+	private Date datahoraini;
 	private int duracao;
 	private String responsavel;
-	private String filial;
-	private String local;
 	private String desc;
-	private int cafe;
 	private String mensagem = "";
 	
 	public Controlador(){ //Construtor
@@ -205,16 +217,17 @@ public class Controlador {
 	
 	//ENVIO DE DADOS PARA O PROCESSAMENTO NO BANCO
 	public String NovaReserva() {
-		System.out.println("SQL A SER EXECUTADO --\n INSERT INTO reservas (datahoraini, duracao, responsavel, filial, local, desc, cafe)"
-				+ "VALUES ('"+datahoraini+"' '"+duracao+"' '"+responsavel+"' '"+filial+"' '"+local+"' '"+desc+"' '"+cafe+"');\n");
-		/*if (dbReservaInsert(datahoraini, duracao, responsavel, filial, local, desc, cafe) == true) {
+		System.out.println(datahoraini);
+		String dataFormatada = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(datahoraini);//FORMATAÇÃO DA DATA RECEBIDA PARA A INSERÇÃO NA TABELA
+		/*System.out.println("SQL A SER EXECUTADO --\n INSERT INTO reservas (datahoraini, duracao, responsavel, filial, local, desc, cafe) "
+				+ "VALUES ('"+dataFormatada+"' '"+duracao+"' '"+responsavel+"' '"+selecaoFilial+"' '"+selecaoLocal+"' '"+desc+"' '"+cafeQPessoas+"');\n");*/
+		if (dbReservaInsert(dataFormatada, duracao, responsavel, selecaoFilial, selecaoLocal, desc, cafeQPessoas) == true) {
 			setMensagem("Sucesso.");
-			return ("Operação bem-sucedida!");
+			return ("listar.jsf");
 		} else  {
 			setMensagem("Erro.");
 			return ("Falha na reserva.");
-		}*/
-		return ("ok");
+		}
 	}
 
 	//GETTERS E SETTERS --->
@@ -229,11 +242,11 @@ public class Controlador {
 		this.id = id;
 	}
 
-	public String getDatahoraini() {
+	public Date getDatahoraini() {
 		return datahoraini;
 	}
 
-	public void setDatahoraini(String datahoraini) {
+	public void setDatahoraini(Date datahoraini) {
 		System.out.println("datahoraini modificada");
 		this.datahoraini = datahoraini;
 	}
@@ -254,36 +267,12 @@ public class Controlador {
 		this.responsavel = responsavel;
 	}
 
-	public String getFilial() {
-		return filial;
-	}
-
-	public void setFilial(String filial) {
-		this.filial = filial;
-	}
-
-	public String getLocal() {
-		return local;
-	}
-
-	public void setLocal(String local) {
-		this.local = local;
-	}
-
 	public String getDesc() {
 		return desc;
 	}
 
 	public void setDesc(String desc) {
 		this.desc = desc;
-	}
-
-	public int getCafe() {
-		return cafe;
-	}
-
-	public void setCafe(int cafe) {
-		this.cafe = cafe;
 	}
 
 	public void setMensagem(String mensagem) {
@@ -296,10 +285,13 @@ public class Controlador {
 		return boxCafe;
 	}
 	public void setBoxCafe(boolean boxCafe2) {
+		System.out.println("SETBOXCAFE");
 		this.boxCafe = boxCafe2;
 		if(this.boxCafe == false) {
+			System.out.println("SETBOXCAFE - FALSE");
 			setCafeQPessoas(0);
 		} else {
+			System.out.println("SETBOXCAFE - TRUE");
 			setCafeQPessoas(getSpinvalue());
 		}
 	}
@@ -316,7 +308,123 @@ public class Controlador {
 		this.cafeQPessoas = cafeQPessoas2;
 		}
 	}
+	public List<String> getFilial() {
+		return filial;
+	}
+	public List<String> getLista() {
+		return lista;
+	}
+	public List<String> getLocaisBanana() {
+		return locaisBanana;
+	}
+	public List<String> getLocaisLaranja() {
+		return locaisLaranja;
+	}
+	public List<String> getLocaisMaca() {
+		return locaisMaca;
+	}
+	public List<String> getLocaisMamao() {
+		return locaisMamao;
+	}
+	public String getSelecaoLocal() {
+		return selecaoLocal;
+	}
+	public void setSelecaoLocal(String selecaoLocal2) {
+		selecaoLocal = selecaoLocal2;
+	}
+	public String getSelecaoFilial() {
+		return selecaoFilial;
+	}
 	// <-- FIM DOS GETTERS E SETTERS
+	
+	//Seleções das listas de Filiais e os locais dos mesmos, respectivamente
+		@ManagedProperty(value="#{selecaoFilial}")
+		protected String selecaoFilial = "Seleção Filial";
+		
+		@ManagedProperty(value="#{selecaoLocal}")
+		protected String selecaoLocal;
+
+		private List<String> lista = new Vector<String>();
+
+		//4 Locais/Filiais para serem armazenados em Strings
+		private List<String> filial = new Vector<String>();
+		
+		//Cada local possui sua quantidade individual para armazenamento de salas, também em Strings
+		private List<String> locaisBanana = new Vector<String>();
+		private List<String> locaisLaranja = new Vector<String>();
+		private List<String> locaisMaca = new Vector<String>();
+		private List<String> locaisMamao = new Vector<String>();
+		
+		private List<String> listaVazia = new Vector<String>();
+		
+		@PostConstruct
+		void setFiliais(){
+		filial.add(" "); //<--- Primeiro valor "vazio", para ser mostrado como caixa branca antes de ser selecionado
+		filial.add("Banana Ltda.");
+		filial.add("Laranja Incorporated.");
+		filial.add("Maçã PLLC.");
+		filial.add("Mamão S.A.");
+		//No momento apenas são inseridas salas genéricas para cada filial.
+			//Nomes das salas são inseridos como 'Sala <número genérico>'
+			for (int i=0; i<13; i++) {
+				locaisBanana.add("Sala "+(i*3+2));
+			}
+			
+			for (int i=0; i<5; i++) {
+				locaisLaranja.add("Sala "+(i*5+3));
+			}
+			
+			for (int i=0; i<6; i++) {
+				locaisMaca.add("Sala "+((i+1)*8-1));
+			}
+
+			for (int i=0; i<3; i++) {
+				locaisMamao.add("Sala "+(i*1));
+			}
+		}
+		public void setSelecaoFilial(String selecaoFilial2) {
+			System.out.println("Seleção Filial - "+selecaoFilial2);
+			this.selecaoFilial = selecaoFilial2;
+			selecionarFilial(null);
+		}
+		
+		public List<String> getListaVazia() {
+			return listaVazia;
+		}
+		
+		public void selecionarFilial(AjaxBehaviorEvent e){
+			listaVazia.add(" ");
+			listaVazia.add(" ");
+			//Recebe a seleção da lista, retorna a lista de locais com o nome da seleção
+			if(selecaoFilial!=null) {
+				switch(selecaoFilial) {
+				case "Banana Ltda.":
+					lista = getLocaisBanana();
+					break;
+				case "Laranja Incorporated." :
+					lista = getLocaisLaranja();
+					break;
+				case "Maçã PLLC." :
+					lista = getLocaisMaca();
+					break;
+				case "Mamão S.A." :
+					lista = getLocaisMamao();
+					break;
+				case "" :
+					lista = listaVazia; //Caso vazio, lista se torna vazia.
+					break;
+				case " " :
+					lista = listaVazia;
+					break;
+				default:
+					lista = listaVazia; //Caso nome não esteja cadastrado, lista se torna vazia.
+					break;
+				}
+			} else {
+				lista = listaVazia; //Caso nulo, lista retorna vazia.
+			}
+			return;
+		}	
 	
 	public void cafeQPessoasChange(int value) {
 		/*Spinner spinner = (Spinner)event.getSource();
@@ -326,7 +434,6 @@ public class Controlador {
 		setCafeQPessoas(value);
 		setSpinvalue(value);
 	}
-	
 
 	public void cafeBoxChange(AjaxBehaviorEvent event) {//Recebe o evento do botão de "Café?" e separa o botão de selecionado ou não
 		if (((SelectBooleanCheckbox)event.getSource()).isSelected()) {
