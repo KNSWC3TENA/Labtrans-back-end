@@ -11,3 +11,8 @@ Tecnologias Utilizadas:
         Corrigidos erros de atribuição de beans nas classes
         Classe filiais agora completa, responsável por manter os dados de filiais e locais de reuniões.
         Classe Pagina será responsável pelas mensagens do sistema à serem mostradas ao usuário
+26/03 - Classe filiais teve suas funções transferidas para a classe Controlador.
+        Classe Lista criada, responsável pela listagem da página de listar, recebeu a função de SELECT da classe Controlador
+        Classe Lista também é responsável pela construção dos valores da dataTable da página Listar, assim como em breve o encaminhamento
+          das variáveis para exclusão e edição na classe Controlador.
+        Diversos Ajustes no Controlador
