@@ -102,7 +102,7 @@ public class Filiais {
 	}
 	
 	
-	public List<String> selecionarFilial(){
+	public void selecionarFilial(){
 		listaVazia.add(" ");
 		listaVazia.add(" ");
 		//Recebe a seleção da lista, retorna a lista de locais com o nome da seleção
@@ -110,27 +110,29 @@ public class Filiais {
 			switch(selecaoFilial) {
 			case "Banana Ltda.":
 				lista = getLocaisBanana();
-				return lista;
+				break;
 			case "Laranja Incorporated." :
 				lista = getLocaisLaranja();
-				return lista;
+				break;
 			case "Maçã PLLC." :
 				lista = getLocaisMaca();
-				return lista;
+				break;
 			case "Mamão S.A." :
 				lista = getLocaisMamao();
-				return lista;
+				break;
 			case "" :
-				return listaVazia; //Caso vazio, retorna lista vazia.
+				lista = listaVazia; //Caso vazio, lista se torna vazia.
+				break;
 			case " " :
-				System.out.println("Retornando vazia...");
-				return listaVazia;
+				lista = listaVazia;
+				break;
 			default:
-				return listaVazia; //Caso nome não esteja cadastrado, retorna lista vazia.
-			
+				lista = listaVazia; //Caso nome não esteja cadastrado, lista se torna vazia.
+				break;
 			}
 		} else {
-			return listaVazia; //Caso nulo, retorna lista vazia.
+			lista = listaVazia; //Caso nulo, lista retorna vazia.
 		}
+		return;
 	}
 }
