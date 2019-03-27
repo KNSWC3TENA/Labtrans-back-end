@@ -1,6 +1,11 @@
 # Labtrans-back-end
 Tecnologias Utilizadas:
-  Java e suas ferramentas, em breve o banco de dados SQLite.
+  Java
+  SQLite
+ 
+ Dificuldades Encontradas:
+  Construção de API RESTful descartada por não ser considerada um requisito funcional e priorizada a construção para a manipulação de dados juntamente de JSF (JSF é naturalmente inviável para a construção REST, a escolha de framework teria de ser outra.)
+  Injeção de dados e manipulação por objetos devido ao front-end em JSF foi inicialmente confuso de se configurar, porém por possuir afinidade com Java SE tais foram problemas temporários, apesar de a organização do código em geral (nome de classes e local das funções) não se encontrar em perfeito estado caso futuramente seja necessário elas podem ser modificadas e no momento se encontram em funcionamento pleno.
  
 23/03 - Iniciado projeto, criadas classes Pagina, Controlador e Calendario com funções básicas
 24/03 - Classe Calendario descartada, funções de seleção de dia e hora agora são feitas pela package calendarioBeans
@@ -16,3 +21,6 @@ Tecnologias Utilizadas:
         Classe Lista também é responsável pela construção dos valores da dataTable da página Listar, assim como em breve o encaminhamento
           das variáveis para exclusão e edição na classe Controlador.
         Diversos Ajustes no Controlador
+27/03 - Adicionadas funções para receber e atribuir os valores selecionados na página de listar.
+        Adicionados encaminhamentos de edição e exclusão de dados da classe Listar para os itens selecionados (edição apenas considera o              primeiro, exclusão considera todos)
+        Diversos pequenos ajustes.
