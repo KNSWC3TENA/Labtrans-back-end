@@ -91,7 +91,7 @@ public class Controlador {
 		}
 		// função dateTime do SQLite utiliza de "YYYY-MM-DD HH:MM:SS" - formatação utilizada em inserções no BD.
 		try {
-				sql =("SELECT * FROM reservas WHERE datetime('"+datahoraini+"') "//Selecionar entre a data e a data + duração da reunião selecionada.
+				sql =("SELECT * FROM reservas WHERE datetime(datahoraini) "//Selecionar entre a data e a data + duração da reunião selecionada.
 						+ "BETWEEN datetime('"+datahoraini+"') AND datetime('"+datahoraini+"', '+"+duracao+" hours');\n");
 				System.out.println(sql);
 				stmt = conn.createStatement();
@@ -120,7 +120,7 @@ public class Controlador {
 		}
 	}
 	
-	protected boolean dbReservaDelete(int id) {
+	protected static boolean dbReservaDelete(int id) {
 		try {
 			Connection conn = getConnection();
 			ResultSet rs = null;
@@ -166,7 +166,7 @@ public class Controlador {
 		}
 	}
 	
-	protected boolean dbReservaUpdate(int id, String datahoraini, int duracao, String responsavel, String filial, String local, String desc, int cafe) {
+	protected static boolean dbReservaUpdate(int id, String responsavel, String filial, String local, String datahoraini, int duracao, String desc, int cafe) {
 		try {
 			Connection conn = getConnection();
 			ResultSet rs = null;

@@ -3,16 +3,15 @@ package bananaBeans;
 import javax.faces.bean.*;
 
 @ManagedBean(name = "Pagina", eager = true)
-@ApplicationScoped
+@NoneScoped
 public class Pagina {
-   private String inicio;
+	private String mensagem="";
+	private String inicio;
    
    public Pagina() {
-      System.out.println("Página inicial chamada.");
    }
    
    public String getInicio() {
-	   inicio ="Seja bem vindo ao sistema de Banana Ltda";
 	   return inicio;
    }
    
@@ -22,4 +21,12 @@ public class Pagina {
 	   resultado ="Sucesso.";
 	   return resultado;
    }
+   
+   public String getMensagem() {
+		return mensagem;
+	}
+
+	public void setMensagem(String mensagem) {
+		this.mensagem = mensagem;
+	}
 }
