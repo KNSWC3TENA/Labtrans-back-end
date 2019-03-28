@@ -55,7 +55,7 @@ public class Lista implements Serializable {
 	
 	
 	
-	public Lista () {
+	public Lista () throws IndexOutOfBoundsException {
 	}
 	
 	public Lista(int id,
@@ -66,7 +66,7 @@ public class Lista implements Serializable {
 	String datahorainiString,
 	int duracao,
 	String desc,
-	int cafe) {
+	int cafe) throws IndexOutOfBoundsException {
 		this.id = id;
 		this.responsavel = responsavel;
 		this.filial = filial;
@@ -356,7 +356,7 @@ public class Lista implements Serializable {
 		return "listar.jsf";
 	}
 	
-	public String envioParaEditar() {
+	public String envioParaEditar() throws IndexOutOfBoundsException{
 		edicaoId = rowsSelecionadas.get(0).id;
 		edicaoResponsavel = rowsSelecionadas.get(0).responsavel;
 		edicaoFilial = rowsSelecionadas.get(0).filial;
