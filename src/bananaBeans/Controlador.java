@@ -79,15 +79,15 @@ public class Controlador {
 		}
 	}
 	
-	protected boolean dbReservaInsert(String datahoraini, int duracao, String responsavel, String filial, String local, String desc, int cafe){
+	protected int dbReservaInsert(String datahoraini, int duracao, String responsavel, String filial, String local, String desc, int cafe){
 		Statement stmt = null;
 		Connection conn = getConnection();
 		ResultSet rs = null;
 		String sql = "";
 		
-		if (datahoraini == null || responsavel == null || filial == null || local == null) {//Checa se alguma String recebida é nula
+		if (datahoraini == null || responsavel == null || filial == null || local == null || filial.equals(" ") || local.equals(" ")) {//Checa se alguma String recebida é nula
 			System.out.println("Inserção nula, cancelando operação.");
-			return false;
+			return 3;
 		}
 		// função dateTime do SQLite utiliza de "YYYY-MM-DD HH:MM:SS" - formatação utilizada em inserções no BD.
 		try {
@@ -102,7 +102,7 @@ public class Controlador {
 					rs.close();
 					stmt.close();
 					conn.close();
-					return false;
+					return 2;
 				} else {
 				//A seleção não obteve resultados, prosseguir com a inserção-
 				System.out.println("Seleção não obteve resultados, prosseguir com a inserção");
@@ -112,11 +112,11 @@ public class Controlador {
 				stmt = conn.createStatement();
 				stmt.execute(sql);
 				System.out.println("Sucesso na inserção de reserva.");
-				return true;
+				return 1;
 				}
 		} catch (SQLException g) {
 				System.out.println("Erro na conexão para INSERT: " + g.getMessage() + "  Código: " + g.getErrorCode());
-				return false;
+				return 3;
 		}
 	}
 	
@@ -166,11 +166,14 @@ public class Controlador {
 		}
 	}
 	
-	protected static boolean dbReservaUpdate(int id, String responsavel, String filial, String local, String datahoraini, int duracao, String desc, int cafe) {
+	protected static int dbReservaUpdate(int id, String responsavel, String filial, String local, String datahoraini, int duracao, String desc, int cafe) {
 		try {
 			Connection conn = getConnection();
 			ResultSet rs = null;
-
+			if (datahoraini == null || responsavel == null || filial == null || local == null || filial.equals(" ") || local.equals(" ")) {//Checa se alguma String recebida é nula
+				System.out.println("Inserção nula, cancelando operação.");
+				return 3;
+			}
 			String sql = ("SELECT responsavel FROM reservas WHERE id='"+id+"'");
 			Statement stmt = conn.createStatement();
 			rs = stmt.executeQuery(sql);
@@ -185,14 +188,14 @@ public class Controlador {
 				System.out.println("Registro Atualizado.");
 				try {if (conn != null) conn.close();} catch (Exception e) {}; // Fecha conexão
 				try {if (stmt != null)stmt.close();} catch (Exception e2) {}; // Fecha statement
-				return true;
+				return 1;
 			} else { //Caso não esteja ocupado ou o id recebido seja inválido
 				System.out.println("Registro vazio, ignorando...");
-				return false;
+				return 2;
 			}
 		} catch (SQLException e) {
 			System.out.println("Erro na conexão para DELETE: " + e.getMessage() + "  Código: " + e.getErrorCode());
-			return false;
+			return 2;
 		}
 	}
 	
@@ -217,17 +220,27 @@ public class Controlador {
 	
 	//ENVIO DE DADOS PARA O PROCESSAMENTO NO BANCO
 	public String NovaReserva() {
+		String dataFormatada;
 		System.out.println(datahoraini);
-		String dataFormatada = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(datahoraini);//FORMATAÇÃO DA DATA RECEBIDA PARA A INSERÇÃO NA TABELA
+		if (datahoraini!=null) {
+		dataFormatada = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(datahoraini);//FORMATAÇÃO DA DATA RECEBIDA PARA A INSERÇÃO NA TABELA
+		} else {
+		dataFormatada = null;
+		}
 		/*System.out.println("SQL A SER EXECUTADO --\n INSERT INTO reservas (datahoraini, duracao, responsavel, filial, local, desc, cafe) "
 				+ "VALUES ('"+dataFormatada+"' '"+duracao+"' '"+responsavel+"' '"+selecaoFilial+"' '"+selecaoLocal+"' '"+desc+"' '"+cafeQPessoas+"');\n");*/
-		if (dbReservaInsert(dataFormatada, duracao, responsavel, selecaoFilial, selecaoLocal, desc, cafeQPessoas) == true) {
+		int resultado = dbReservaInsert(dataFormatada, duracao, responsavel, selecaoFilial, selecaoLocal, desc, cafeQPessoas);
+		if (resultado == 1) { //Se resultado for bem-sucedido
 			Pagina.save();
 			return ("listar.jsf");
-		} else  {
+		} else if (resultado == 2) { //Se houve conflito de entradas devido a datahora
 			Pagina.saveFail();
 			return ("");
+		} else if (resultado == 3){ //Se houve falha devido à campos nulos/vazios
+			Pagina.saveFailNull();
+			return("");
 		}
+		return ("");
 	}
 
 	//GETTERS E SETTERS --->

@@ -24,23 +24,32 @@ public class Pagina {
     }
 	
     public static void save() {
-        addMessage("Reunião Registrada.");
+        addMessage("Reunião registrada.");
     }
     public static void saveFail() {
     	addMessage("Já existe uma reunião na data selecionada.");
     }
+
+    public static void saveFailNull() {
+		addMessage("Erro: campos obrigatórios vazios.");
+    }
+   
+    
     
     
     public static void update() {
-        addMessage("Registro Atualizado.");
+        addMessage("Registro atualizado.");
     }
     public static void updateFail() {
     	addMessage("Falha na atualização do registro.");
     }
     
+    public static void updateFailNull() {
+    	addMessage("Erro: campos obrigatórios vazios.");
+    }
     
     public static void delete() {
-        addMessage("Registro Excluído.");
+        addMessage("Registro excluído.");
     }
  
     public static void addMessage(String summary) {
@@ -51,5 +60,5 @@ public class Pagina {
 	
    public Pagina() {
    }
-   
+
 }

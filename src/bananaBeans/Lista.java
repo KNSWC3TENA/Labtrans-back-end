@@ -21,7 +21,7 @@ import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 @SuppressWarnings("serial")
 @ManagedBean (name="Lista", eager=true)
 @ViewScoped
-public class Lista implements Serializable{
+public class Lista implements Serializable {
 	private int id;
 	private String responsavel;
 	private String filial;
@@ -55,7 +55,7 @@ public class Lista implements Serializable{
 	
 	
 	
-	public Lista() {
+	public Lista () {
 	}
 	
 	public Lista(int id,
@@ -102,8 +102,16 @@ public class Lista implements Serializable{
 
 	//GETTERS E SETTERS --->
 	
-	public List<Lista> getRowsSelecionadas() {
+	public List<Lista> getRowsSelecionadas() throws IndexOutOfBoundsException {
 		return rowsSelecionadas;
+	}
+
+	public List<String> getListaVazia() {
+		return listaVazia;
+	}
+
+	public void setListaVazia(List<String> listaVazia) {
+		this.listaVazia = listaVazia;
 	}
 
 	public String getDatahorainiString() {
@@ -126,7 +134,7 @@ public class Lista implements Serializable{
 		return nRowsTotal;
 	}
 
-	public void setRowsSelecionadas(List<Lista> rowsSelecionadas) {
+	public void setRowsSelecionadas(List<Lista> rowsSelecionadas) throws IndexOutOfBoundsException {
 		this.rowsSelecionadas = rowsSelecionadas;
 		setnRowsSelecionadas(rowsSelecionadas.size());
 		envioParaEditar();
@@ -285,6 +293,7 @@ public class Lista implements Serializable{
 	}
 	
 	//<--- FIM DE GETTERS E SETTERS
+	
 	public void selecionarFilialAjax (AjaxBehaviorEvent e) {
 		selecionarFilial(this.edicaoFilial);
 	}
@@ -368,10 +377,13 @@ public class Lista implements Serializable{
 
 	public String EditarReserva() {
 		String dataFormatada = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(edicaoDatahoraini);//Formatação da Date da classe para String pro banco.
-		if (Controlador.dbReservaUpdate(edicaoId, edicaoResponsavel, edicaoFilial, edicaoLocal, dataFormatada, edicaoDuracao, edicaoDesc, cafeQPessoas)) {
+		int resultado = Controlador.dbReservaUpdate(edicaoId, edicaoResponsavel, edicaoFilial, edicaoLocal, dataFormatada, edicaoDuracao, edicaoDesc, cafeQPessoas);
+		if (resultado == 1) {
 			Pagina.update();
-		} else {
+		} else if (resultado == 2){
 			Pagina.updateFail();
+		} else if (resultado == 3) {
+			Pagina.updateFailNull();
 		}
 		return "listar.jsf";
 	}
