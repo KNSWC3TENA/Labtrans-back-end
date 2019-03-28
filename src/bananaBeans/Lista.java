@@ -3,8 +3,12 @@ package bananaBeans;
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Vector;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
@@ -22,7 +26,8 @@ public class Lista implements Serializable{
 	private String responsavel;
 	private String filial;
 	private String local;
-	private String datahoraini;
+	private Date datahoraini;
+	private String datahorainiString;
 	private int duracao;
 	private String desc;
 	private int cafe;
@@ -30,6 +35,8 @@ public class Lista implements Serializable{
 	private int nRowsSelecionadas;
 	private List<Lista> listaCompleta = new ArrayList<Lista>();
 	private List<Lista> rowsSelecionadas = new ArrayList<Lista>();
+	private List<String> listaLocais = new Vector<String>();
+	private List<String> listaVazia = new Vector<String>();
 	
 	//Dados para a edição de entradas -->
 	@ManagedProperty(value="#{cafeQPessoas}") //Mesmos dados que o controlador, porém armazenados para edição e com um valor já inicializado
@@ -41,10 +48,9 @@ public class Lista implements Serializable{
 	String edicaoResponsavel;
 	String edicaoFilial;
 	String edicaoLocal;
-	String edicaoDatahoraini;
+	Date edicaoDatahoraini;
 	int edicaoDuracao;
 	String edicaoDesc;
-	int edicaoCafe;
 	//<-- Dados para a edição de entradas
 	
 	
@@ -56,7 +62,8 @@ public class Lista implements Serializable{
 	String responsavel,
 	String filial,
 	String local,
-	String datahoraini,
+	Date datahoraini,
+	String datahorainiString,
 	int duracao,
 	String desc,
 	int cafe) {
@@ -65,6 +72,7 @@ public class Lista implements Serializable{
 		this.filial = filial;
 		this.local = local;
 		this.datahoraini = datahoraini;
+		this.datahorainiString = datahorainiString;
 		this.duracao = duracao;
 		this.desc = desc;
 		this.cafe = cafe;
@@ -76,21 +84,42 @@ public class Lista implements Serializable{
 		System.out.println("Receber Lista iniciado");
 	nRowsTotal = 0;
 	ResultSet rs = Controlador.dbReservaSelect();
+	
+	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm"); //Variável para formatar a String de data do banco, valor padrão para SQL
+	Date dataHoraFormatada; //Variável para receber o valor do banco (String) em Date
 		try {
 			while (rs.next()) {
-			listaCompleta.add(new Lista (rs.getInt("id"), rs.getString("responsavel"), rs.getString("filial"), rs.getString("local"), rs.getString("datahoraini"),
-						rs.getInt("duracao"), rs.getString("desc"), rs.getInt("cafe")));
+			dataHoraFormatada = sdf.parse(rs.getString("datahoraini")); //Transferência de String do banco para Date da classe
+			listaCompleta.add(new Lista (rs.getInt("id"), rs.getString("responsavel"), rs.getString("filial"), rs.getString("local"), dataHoraFormatada,
+						rs.getString("datahoraini"), rs.getInt("duracao"), rs.getString("desc"), rs.getInt("cafe")));
 			nRowsTotal++;
 		}
-	} catch (SQLException e) {
+	} catch (SQLException | ParseException e) {
 		e.printStackTrace();
 		}
 	}
 	
 
 	//GETTERS E SETTERS --->
+	
 	public List<Lista> getRowsSelecionadas() {
 		return rowsSelecionadas;
+	}
+
+	public String getDatahorainiString() {
+		return datahorainiString;
+	}
+
+	public void setDatahorainiString(String datahorainiString) {
+		this.datahorainiString = datahorainiString;
+	}
+
+	public List<String> getListaLocais() {
+		return listaLocais;
+	}
+
+	public void setListaLocais(List<String> listaLocais) {
+		this.listaLocais = listaLocais;
 	}
 
 	public int getnRowsTotal() {
@@ -139,10 +168,10 @@ public class Lista implements Serializable{
 	public void setLocal(String local) {
 		this.local = local;
 	}
-	public String getDatahoraini() {
+	public Date getDatahoraini() {
 		return datahoraini;
 	}
-	public void setDatahoraini(String datahoraini) {
+	public void setDatahoraini(Date datahoraini) {
 		this.datahoraini = datahoraini;
 	}
 	public int getDuracao() {
@@ -170,13 +199,10 @@ public class Lista implements Serializable{
 		return boxCafe;
 	}
 	public void setBoxCafe(boolean boxCafe2) {
-		System.out.println("SETBOXCAFE");
 		this.boxCafe = boxCafe2;
 		if(this.boxCafe == false) {
-			System.out.println("SETBOXCAFE - FALSE");
 			setCafeQPessoas(0);
 		} else {
-			System.out.println("SETBOXCAFE - TRUE");
 			setCafeQPessoas(getSpinvalue());
 		}
 	}
@@ -222,14 +248,15 @@ public class Lista implements Serializable{
 	}
 
 	public void setEdicaoLocal(String edicaoLocal) {
+		System.out.println("SET EDICAO LOCAL");
 		this.edicaoLocal = edicaoLocal;
 	}
 
-	public String getEdicaoDatahoraini() {
+	public Date getEdicaoDatahoraini() {
 		return edicaoDatahoraini;
 	}
 
-	public void setEdicaoDatahoraini(String edicaoDatahoraini) {
+	public void setEdicaoDatahoraini(Date edicaoDatahoraini) {
 		this.edicaoDatahoraini = edicaoDatahoraini;
 	}
 
@@ -249,14 +276,6 @@ public class Lista implements Serializable{
 		this.edicaoDesc = edicaoDesc;
 	}
 
-	public int getEdicaoCafe() {
-		return edicaoCafe;
-	}
-
-	public void setEdicaoCafe(int edicaoCafe) {
-		this.edicaoCafe = edicaoCafe;
-	}
-
 	public void setnRowsTotal(int nRowsTotal) {
 		this.nRowsTotal = nRowsTotal;
 	}
@@ -266,7 +285,45 @@ public class Lista implements Serializable{
 	}
 	
 	//<--- FIM DE GETTERS E SETTERS
-
+	public void selecionarFilialAjax (AjaxBehaviorEvent e) {
+		selecionarFilial(this.edicaoFilial);
+	}
+	
+	//CLONES DE FUNÇÕES DA CLASSE CONTROLADOR --->
+	private void selecionarFilial(String selecaoFilial){
+		//Recebe a seleção da lista, retorna a lista de locais com o nome da seleção
+		listaVazia.add(" ");
+		listaVazia.add(" ");
+		if(selecaoFilial!=null) {
+			switch(selecaoFilial) {
+			case "Banana Ltda.":
+				this.listaLocais = Controlador.getLocaisBanana();
+				break;
+			case "Laranja Incorporated." :
+				this.listaLocais = Controlador.getLocaisLaranja();
+				break;
+			case "Maçã PLLC." :
+				this.listaLocais = Controlador.getLocaisMaca();
+				break;
+			case "Mamão S.A." :
+				this.listaLocais = Controlador.getLocaisMamao();
+				break;
+			case "" :
+				this.listaLocais = listaVazia; //Caso vazio, lista se torna vazia.
+				break;
+			case " " :
+				this.listaLocais = listaVazia;
+				break;
+			default:
+				this.listaLocais = listaVazia; //Caso nome não esteja cadastrado, lista se torna vazia.
+				break;
+			}
+		} else {
+			listaLocais = listaVazia; //Caso nulo, lista retorna vazia.
+		}
+		return;
+	}	
+	
 	public void cafeBoxChange(AjaxBehaviorEvent event) {//Recebe o evento do botão de "Café?" e separa o botão de selecionado ou não
 		if (((SelectBooleanCheckbox)event.getSource()).isSelected()) {
 			setBoxCafe(true);
@@ -274,16 +331,19 @@ public class Lista implements Serializable{
 			setBoxCafe(false);
 		}
 	}
+	//<-- CLONES DE FUNÇÕES DA CLASSE CONTROLADOR
+	
 	
 	public String cancelarSelecoes(){
-		rowsSelecionadas = null;
+		rowsSelecionadas  = new ArrayList<Lista>();
 		return "listar.jsf";
 	}
 	
-	public String excluirEntradas(){
+	public String excluirEntradas(){ //Função chamada pelo botão "Sim" do diálogo de exclusão da página de listagem
 		for(int i=0; i<rowsSelecionadas.size();i++) {
 			Controlador.dbReservaDelete(rowsSelecionadas.get(i).id);
 		}
+		Pagina.delete(); //Mensagem pré-selecionada para aparecer na tela "Registro Excluído"
 		return "listar.jsf";
 	}
 	
@@ -292,12 +352,11 @@ public class Lista implements Serializable{
 		edicaoResponsavel = rowsSelecionadas.get(0).responsavel;
 		edicaoFilial = rowsSelecionadas.get(0).filial;
 		edicaoLocal = rowsSelecionadas.get(0).local;
+		selecionarFilial(edicaoFilial);
 		edicaoDatahoraini = rowsSelecionadas.get(0).datahoraini;
 		edicaoDuracao = rowsSelecionadas.get(0).duracao;
 		edicaoDesc = rowsSelecionadas.get(0).desc;
-		edicaoCafe = rowsSelecionadas.get(0).cafe;
 		cafeQPessoas = rowsSelecionadas.get(0).cafe;
-		System.out.println("Lista para edição - "+ edicaoResponsavel +" "+edicaoDatahoraini + " "+edicaoLocal);
 		if (cafeQPessoas > 0) {
 			boxCafe = true;
 		} else if (cafeQPessoas <= 0) {
@@ -308,7 +367,12 @@ public class Lista implements Serializable{
 	
 
 	public String EditarReserva() {
-		Controlador.dbReservaUpdate(edicaoId, edicaoResponsavel, edicaoFilial, edicaoLocal, edicaoDatahoraini, edicaoDuracao, edicaoDesc, edicaoCafe);
+		String dataFormatada = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(edicaoDatahoraini);//Formatação da Date da classe para String pro banco.
+		if (Controlador.dbReservaUpdate(edicaoId, edicaoResponsavel, edicaoFilial, edicaoLocal, dataFormatada, edicaoDuracao, edicaoDesc, cafeQPessoas)) {
+			Pagina.update();
+		} else {
+			Pagina.updateFail();
+		}
 		return "listar.jsf";
 	}
 }

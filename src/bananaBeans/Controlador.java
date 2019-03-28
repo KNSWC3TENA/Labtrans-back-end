@@ -222,11 +222,11 @@ public class Controlador {
 		/*System.out.println("SQL A SER EXECUTADO --\n INSERT INTO reservas (datahoraini, duracao, responsavel, filial, local, desc, cafe) "
 				+ "VALUES ('"+dataFormatada+"' '"+duracao+"' '"+responsavel+"' '"+selecaoFilial+"' '"+selecaoLocal+"' '"+desc+"' '"+cafeQPessoas+"');\n");*/
 		if (dbReservaInsert(dataFormatada, duracao, responsavel, selecaoFilial, selecaoLocal, desc, cafeQPessoas) == true) {
-			setMensagem("Sucesso.");
+			Pagina.save();
 			return ("listar.jsf");
 		} else  {
-			setMensagem("Erro.");
-			return ("Falha na reserva.");
+			Pagina.saveFail();
+			return ("");
 		}
 	}
 
@@ -285,13 +285,10 @@ public class Controlador {
 		return boxCafe;
 	}
 	public void setBoxCafe(boolean boxCafe2) {
-		System.out.println("SETBOXCAFE");
 		this.boxCafe = boxCafe2;
 		if(this.boxCafe == false) {
-			System.out.println("SETBOXCAFE - FALSE");
 			setCafeQPessoas(0);
 		} else {
-			System.out.println("SETBOXCAFE - TRUE");
 			setCafeQPessoas(getSpinvalue());
 		}
 	}
@@ -314,16 +311,16 @@ public class Controlador {
 	public List<String> getLista() {
 		return lista;
 	}
-	public List<String> getLocaisBanana() {
+	public static List<String> getLocaisBanana() {
 		return locaisBanana;
 	}
-	public List<String> getLocaisLaranja() {
+	public static List<String> getLocaisLaranja() {
 		return locaisLaranja;
 	}
-	public List<String> getLocaisMaca() {
+	public static List<String> getLocaisMaca() {
 		return locaisMaca;
 	}
-	public List<String> getLocaisMamao() {
+	public static List<String> getLocaisMamao() {
 		return locaisMamao;
 	}
 	public String getSelecaoLocal() {
@@ -350,10 +347,10 @@ public class Controlador {
 		private List<String> filial = new Vector<String>();
 		
 		//Cada local possui sua quantidade individual para armazenamento de salas, também em Strings
-		private List<String> locaisBanana = new Vector<String>();
-		private List<String> locaisLaranja = new Vector<String>();
-		private List<String> locaisMaca = new Vector<String>();
-		private List<String> locaisMamao = new Vector<String>();
+		private static List<String> locaisBanana = new Vector<String>();
+		private static List<String> locaisLaranja = new Vector<String>();
+		private static List<String> locaisMaca = new Vector<String>();
+		private static List<String> locaisMamao = new Vector<String>();
 		
 		private List<String> listaVazia = new Vector<String>();
 		
@@ -399,29 +396,29 @@ public class Controlador {
 			if(selecaoFilial!=null) {
 				switch(selecaoFilial) {
 				case "Banana Ltda.":
-					lista = getLocaisBanana();
+					this.lista = getLocaisBanana();
 					break;
 				case "Laranja Incorporated." :
-					lista = getLocaisLaranja();
+					this.lista = getLocaisLaranja();
 					break;
 				case "Maçã PLLC." :
-					lista = getLocaisMaca();
+					this.lista = getLocaisMaca();
 					break;
 				case "Mamão S.A." :
-					lista = getLocaisMamao();
+					this.lista = getLocaisMamao();
 					break;
 				case "" :
-					lista = listaVazia; //Caso vazio, lista se torna vazia.
+					this.lista = listaVazia; //Caso vazio, lista se torna vazia.
 					break;
 				case " " :
-					lista = listaVazia;
+					this.lista = listaVazia;
 					break;
 				default:
-					lista = listaVazia; //Caso nome não esteja cadastrado, lista se torna vazia.
+					this.lista = listaVazia; //Caso nome não esteja cadastrado, lista se torna vazia.
 					break;
 				}
 			} else {
-				lista = listaVazia; //Caso nulo, lista retorna vazia.
+				this.lista = listaVazia; //Caso nulo, lista retorna vazia.
 			}
 			return;
 		}	
